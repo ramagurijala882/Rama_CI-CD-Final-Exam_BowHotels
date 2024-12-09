@@ -1,20 +1,20 @@
-name: CI/CD for BowHotels
+name: Deploy Static Website to S3 and Elastic Beanstalk
 
 on:
   push:
     branches:
-      - main
+      - main  # Triggers the workflow on pushes to the main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout code from GitHub
+    # Step 1: Checkout code from GitHub
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Configure AWS credentials
+    # Step 2: Configure AWS credentials
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v3
       with:
@@ -22,11 +22,37 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-   
+    # Step 3: Deploy to S3
+    - name: Deploy to S3
+      run: |
+        echo "Deploying to S3..."
+        aws s3 sync ./ s3://YOUR_S3_BUCKET_NAME --delete
+        echo "Deployment to S3 completed."
 
-    # Deploy to Elastic Beanstalk
+    # Step 4: Prepare files for Elastic Beanstalk
+    - name: Zip Static Files for Elastic Beanstalk
+      run: |
+        echo "Zipping files for Elastic Beanstalk..."
+        zip -r bowhotels.zip .
+        echo "Files zipped successfully."
+
+    # Step 5: Upload ZIP file to S3 (for Elastic Beanstalk source)
+    - name: Upload ZIP to S3 for Elastic Beanstalk
+      run: |
+        echo "Uploading ZIP file to S3 for Elastic Beanstalk..."
+        aws s3 cp bowhotels.zip s3://YOUR_S3_BUCKET_NAME/bowhotels.zip
+        echo "ZIP file uploaded successfully."
+
+    # Step 6: Deploy to Elastic Beanstalk
     - name: Deploy to Elastic Beanstalk
       run: |
-        zip -r application.zip .
-        aws elasticbeanstalk create-application-version --application-name bowhotels-app --version-label v1 --source-bundle S3Bucket="bowhotels-static-assets",S3Key="application.zip"
-        aws elasticbeanstalk update-environment --environment-name bowhotels-env --version-label v1
+        echo "Deploying to Elastic Beanstalk..."
+        aws elasticbeanstalk create-application-version \
+          --application-name bowhotels-app \
+          --version-label v1 \
+          --source-bundle S3Bucket="YOUR_S3_BUCKET_NAME",S3Key="bowhotels.zip"
+
+        aws elasticbeanstalk update-environment \
+          --environment-name YOUR_ENVIRONMENT_NAME \
+          --version-label v1
+        echo "Deployment to Elastic Beanstalk completed."
