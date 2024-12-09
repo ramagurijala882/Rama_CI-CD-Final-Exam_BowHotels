@@ -40,7 +40,7 @@ jobs:
     - name: Upload ZIP to S3 for Elastic Beanstalk
       run: |
         echo "Uploading ZIP file to S3 for Elastic Beanstalk..."
-        aws s3 cp bowhotels.zip s3://YOUR_S3_BUCKET_NAME/bowhotels.zip
+        aws s3 cp bowhotels.zip s3://ramafinalexam3403/bowhotels.zip
         echo "ZIP file uploaded successfully."
 
     # Step 6: Deploy to Elastic Beanstalk
