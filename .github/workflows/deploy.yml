@@ -25,7 +25,7 @@ jobs:
     # Deploy to S3 (if hosting static assets)
     - name: Deploy to S3
       run: |
-        aws s3 sync ./path-to-static-files s3://bowhotels-static-assets --delete
+        aws s3 sync ./ s3://bowhotels-static-assets --delete
 
     # Deploy to Elastic Beanstalk
     - name: Deploy to Elastic Beanstalk
