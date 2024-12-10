@@ -1,6 +1,6 @@
-name: Deploy Static Website to EC2
+name: Deploy Dynamic Website to EC2 and S3
 
-on: 
+on:
   push:
     branches:
       - main  # Trigger the workflow on pushes to the main branch
@@ -22,37 +22,38 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    # Step 3: Zip Static Files
-    - name: Zip Static Files
+    # Step 3: Deploy Static Assets to S3
+    - name: Deploy Static Assets to S3
       run: |
-        echo "Zipping files for EC2 deployment..."
-        zip -r static-website.zip .
-        echo "Files zipped successfully."
+        echo "Deploying static assets to S3..."
+        aws s3 sync ./static-assets s3://ramafinalexam3403 --delete
+        echo "Static assets deployed to S3 successfully."
 
     # Step 4: Create Private Key File from Secret
     - name: Create Private Key File
       run: |
-        echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2-key.pem
+        echo "${{ secrets.NEW_EC2_PRIVATE_KEY }}" > ec2-key.pem
         chmod 400 ec2-key.pem
 
-    # Step 5: Copy ZIP File to EC2 Instance
-    - name: Copy Files to EC2
+    # Step 5: Copy Backend Code to EC2 Instance
+    - name: Copy Backend Code to EC2
       run: |
-        echo "Copying files to EC2 instance..."
-        scp -o StrictHostKeyChecking=no -i ec2-key.pem static-website.zip ec2-user@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/
-        echo "Files copied successfully."
+        echo "Copying backend files to EC2 instance..."
+        scp -o StrictHostKeyChecking=no -i ec2-key.pem -r ./backend ec2-user@${{ secrets.NEW_EC2_PUBLIC_IP }}:/home/ec2-user/
+        echo "Backend files copied successfully."
 
-    # Step 6: Deploy Static Website on EC2
-    - name: Deploy on EC2
+    # Step 6: Deploy Backend to EC2
+    - name: Deploy Backend on EC2
       run: |
-        echo "Deploying on EC2 instance..."
-        ssh -o StrictHostKeyChecking=no -i ec2-key.pem ec2-user@${{ secrets.EC2_PUBLIC_IP }} << EOF
+        echo "Deploying backend on EC2 instance..."
+        ssh -o StrictHostKeyChecking=no -i ec2-key.pem ec2-user@${{ secrets.NEW_EC2_PUBLIC_IP }} << EOF
           sudo yum update -y
-          sudo yum install -y httpd
+          sudo yum install -y httpd php php-cli php-mysqlnd
           sudo systemctl start httpd
           sudo systemctl enable httpd
           cd /var/www/html
-          sudo unzip -o /home/ec2-user/static-website.zip -d .
+          sudo rm -rf *
+          sudo cp -r /home/ec2-user/backend/* .
           sudo chmod -R 755 /var/www/html
-          echo "Static website deployed successfully on EC2."
+          echo "Dynamic website backend deployed successfully on EC2."
         EOF
