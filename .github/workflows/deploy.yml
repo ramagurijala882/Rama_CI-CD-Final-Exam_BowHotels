@@ -1,20 +1,20 @@
-name: Deploy Static Website to S3 and Elastic Beanstalk
- 
+name: Deploy Static Website to Elastic Beanstalk
+
 on:
   push:
     branches:
-      - main  # Triggers the workflow on pushes to the main branch
+      - main  # Trigger the workflow on pushes to the main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout code from GitHub
+    # Step 1: Checkout Code
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    # Step 2: Configure AWS credentials
+    # Step 2: Configure AWS Credentials
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v3
       with:
@@ -43,16 +43,18 @@ jobs:
         aws s3 cp bowhotels.zip s3://ramafinalexam3403/bowhotels.zip
         echo "ZIP file uploaded successfully."
 
-        # Step 6: Deploy to Elastic Beanstalk
+    # Step 6: Deploy to Elastic Beanstalk
     - name: Deploy to Elastic Beanstalk
       run: |
         echo "Deploying to Elastic Beanstalk..."
+        VERSION_LABEL="v1-$(date +'%Y%m%d%H%M%S')"
+        echo "Using version label: $VERSION_LABEL"
         aws elasticbeanstalk create-application-version \
           --application-name ramafinalexam3 \
-          --version-label v1 \
+          --version-label $VERSION_LABEL \
           --source-bundle S3Bucket="ramafinalexam3403",S3Key="bowhotels.zip"
 
         aws elasticbeanstalk update-environment \
           --environment-id e-wu5aiu35hk \
-          --version-label v1
+          --version-label $VERSION_LABEL
         echo "Deployment to Elastic Beanstalk completed."
