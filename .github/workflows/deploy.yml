@@ -1,5 +1,5 @@
 name: Deploy Static Website to S3 and Elastic Beanstalk
-
+ 
 on:
   push:
     branches:
