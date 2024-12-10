@@ -48,11 +48,11 @@ jobs:
       run: |
         echo "Deploying to Elastic Beanstalk..."
         aws elasticbeanstalk create-application-version \
-          --application-name bowhotels-app \
-          --version-label v1 \
-          --source-bundle S3Bucket="YOUR_S3_BUCKET_NAME",S3Key="bowhotels.zip"
+  --application-name ramafinalexam3 \
+  --version-label v1 \
+  --source-bundle S3Bucket="ramafinalexam3403",S3Key="bowhotels.zip"
 
         aws elasticbeanstalk update-environment \
-          --environment-name YOUR_ENVIRONMENT_NAME \
-          --version-label v1
+  --environment-name Ramafinalexam3-env \
+  --version-label v1
         echo "Deployment to Elastic Beanstalk completed."
