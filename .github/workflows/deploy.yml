@@ -1,6 +1,6 @@
 name: Deploy Dynamic Website to EC2 and S3
 
-on:
+on: 
   push:
     branches:
       - main
