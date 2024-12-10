@@ -1,4 +1,4 @@
-name: Deploy Static Website to Elastic Beanstalk
+name: Deploy Static Website to EC2
 
 on:
   push:
@@ -22,39 +22,31 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    # Step 3: Deploy to S3
-    - name: Deploy to S3
+    # Step 3: Zip Static Files
+    - name: Zip Static Files
       run: |
-        echo "Deploying to S3..."
-        aws s3 sync ./ s3://ramafinalexam3403 --delete
-        echo "Deployment to S3 completed."
-
-    # Step 4: Prepare files for Elastic Beanstalk
-    - name: Zip Static Files for Elastic Beanstalk
-      run: |
-        echo "Zipping files for Elastic Beanstalk..."
-        zip -r bowhotels.zip .
+        echo "Zipping files for EC2 deployment..."
+        zip -r static-website.zip .
         echo "Files zipped successfully."
 
-    # Step 5: Upload ZIP file to S3 (for Elastic Beanstalk source)
-    - name: Upload ZIP to S3 for Elastic Beanstalk
+    # Step 4: Copy ZIP File to EC2 Instance
+    - name: Copy Files to EC2
       run: |
-        echo "Uploading ZIP file to S3 for Elastic Beanstalk..."
-        aws s3 cp bowhotels.zip s3://ramafinalexam3403/bowhotels.zip
-        echo "ZIP file uploaded successfully."
+        echo "Copying files to EC2 instance..."
+        scp -o StrictHostKeyChecking=no -i ${{ secrets.EC2_KEY_PAIR_PATH }} static-website.zip ec2-user@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/
+        echo "Files copied successfully."
 
-    # Step 6: Deploy to Elastic Beanstalk
-    - name: Deploy to Elastic Beanstalk
+    # Step 5: Deploy Static Website on EC2
+    - name: Deploy on EC2
       run: |
-        echo "Deploying to Elastic Beanstalk..."
-        VERSION_LABEL="v1-$(date +'%Y%m%d%H%M%S')"
-        echo "Using version label: $VERSION_LABEL"
-        aws elasticbeanstalk create-application-version \
-          --application-name ramafinalexam3 \
-          --version-label $VERSION_LABEL \
-          --source-bundle S3Bucket="ramafinalexam3403",S3Key="bowhotels.zip"
-
-        aws elasticbeanstalk update-environment \
-          --environment-id e-wu5aiu35hk \
-          --version-label $VERSION_LABEL
-        echo "Deployment to Elastic Beanstalk completed."
+        echo "Deploying on EC2 instance..."
+        ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_KEY_PAIR_PATH }} ec2-user@${{ secrets.EC2_PUBLIC_IP }} << EOF
+          sudo yum update -y
+          sudo yum install -y httpd
+          sudo systemctl start httpd
+          sudo systemctl enable httpd
+          cd /var/www/html
+          sudo unzip -o /home/ec2-user/static-website.zip -d .
+          sudo chmod -R 755 /var/www/html
+          echo "Static website deployed successfully on EC2."
+        EOF
