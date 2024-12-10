@@ -43,7 +43,7 @@ jobs:
         aws s3 cp bowhotels.zip s3://ramafinalexam3403/bowhotels.zip
         echo "ZIP file uploaded successfully."
 
-    # Step 6: Deploy to Elastic Beanstalk
+        # Step 6: Deploy to Elastic Beanstalk
     - name: Deploy to Elastic Beanstalk
       run: |
         echo "Deploying to Elastic Beanstalk..."
@@ -53,6 +53,6 @@ jobs:
           --source-bundle S3Bucket="ramafinalexam3403",S3Key="bowhotels.zip"
 
         aws elasticbeanstalk update-environment \
-          --environment-name Ramafinalexam3-env \
+          --environment-id e-wu5aiu35hk \
           --version-label v1
         echo "Deployment to Elastic Beanstalk completed."
