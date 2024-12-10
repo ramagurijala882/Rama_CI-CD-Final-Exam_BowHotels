@@ -35,20 +35,18 @@ jobs:
         echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2-key.pem
         chmod 400 ec2-key.pem
 
-    # Step 5: Debug Directory Structure
-    - name: Debug Directory Structure
-      run: |
-        echo "Listing all files in the repository:"
-        ls -al
-
-    # Step 6: Copy All Files to EC2 Instance
+    # Step 5: Copy Files to EC2 Instance
     - name: Copy Files to EC2
       run: |
-        echo "Copying all files to EC2 instance..."
-        scp -v -o StrictHostKeyChecking=no -i ec2-key.pem -r . ec2-user@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/
+        echo "Copying files to EC2 instance..."
+        scp -v -o StrictHostKeyChecking=no -i ec2-key.pem \
+          index.html comingsoon.html contact.html hotels.html modernhoteldetailed.html \
+          vintagehoteldetailed.html script.js style.css submit_contact.php \
+          ec2-user@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/
+        scp -v -o StrictHostKeyChecking=no -i ec2-key.pem -r images ec2-user@${{ secrets.EC2_PUBLIC_IP }}:/home/ec2-user/
         echo "Files copied successfully."
 
-    # Step 7: Deploy Website on EC2
+    # Step 6: Deploy Website on EC2
     - name: Deploy Website on EC2
       run: |
         echo "Deploying website on EC2 instance..."
