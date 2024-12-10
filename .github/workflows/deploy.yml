@@ -1,7 +1,7 @@
 name: Deploy Dynamic Website to EC2 and S3
 
 on:
-  push:
+  push: 
     branches:
       - main  # Trigger the workflow on pushes to the main branch
 
