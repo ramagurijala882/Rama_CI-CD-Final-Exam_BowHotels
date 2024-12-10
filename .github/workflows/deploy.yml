@@ -26,7 +26,7 @@ jobs:
     - name: Deploy Static Assets to S3
       run: |
         echo "Deploying static assets to S3..."
-        aws s3 sync ./ -assets s3://ramafinalexam3403 --delete
+        aws s3 sync ./ s3://ramafinalexam3403 --delete
         echo "Static assets deployed to S3 successfully."
 
     # Step 4: Create Private Key File from Secret
