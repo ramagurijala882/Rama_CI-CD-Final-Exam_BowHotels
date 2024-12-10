@@ -32,7 +32,7 @@ jobs:
     # Step 4: Create Private Key File from Secret
     - name: Create Private Key File
       run: |
-        echo "${{ secrets.NEW_EC2_PRIVATE_KEY }}" > ec2-key.pem
+        echo "${{ secrets.EC2_PRIVATE_KEY }}" > ec2-key.pem
         chmod 400 ec2-key.pem
 
     # Step 5: Debug EC2 Public IP
